@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% block title %}— {{ action }} Property{% endblock %}
+
+{% block extra_style %}
+<style>
+  .form-card {
+    max-width: 760px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .form-card-header {
+    background: var(--ink);
+    padding: 1.5rem 2rem;
+    border-bottom: 3px solid var(--gold);
+  }
+  .form-card-header h2 {
+    font-family: 'Playfair Display', serif;
+    color: #fff;
+    font-size: 1.5rem;
+  }
+  .form-card-header p { color: rgba(255,255,255,0.6); font-size: 0.88rem; margin-top: 0.3rem; }
+  .form-body { padding: 2rem; }
+  .section-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    font-weight: 500;
+    margin: 1.5rem 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-label:first-child { margin-top: 0; }
+  .form-actions { display: flex; gap: 1rem; padding-top: 1.5rem; border-top: 1px solid var(--border); margin-top: 0.5rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>{{ action }} Property</h1>
+    <p>{{ 'Fill in the details to list a new property.' if action == 'Add' else 'Update the property information below.' }}</p>
+  </div>
+
+  <div class="form-card">
+    <div class="form-card-header">
+      <h2>{{ '🏠 New Listing' if action == 'Add' else '✏️ Edit Listing' }}</h2>
+      <p>All fields marked are required for a complete listing.</p>
+    </div>
+    <div class="form-body">
+      <form method="POST">
+
+        <div class="section-label">Basic Information</div>
+
+        <div class="form-group">
+          <label>Property Title *</label>
+          <input type="text" name="title" required placeholder="e.g. Sunrise Villa, Green Park Apartment"
+                 value="{{ prop.title if prop else '' }}" />
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Property Type *</label>
+            <select name="type" required>
+              <option value="">— Select type —</option>
+              {% for t in ['House', 'Apartment', 'Land'] %}
+              <option value="{{ t }}" {{ 'selected' if prop and prop.type == t }}>{{ t }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Status *</label>
+            <select name="status" required>
+              {% for s in ['Available', 'Sold', 'Rented'] %}
+              <option value="{{ s }}" {{ 'selected' if prop and prop.status == s }}>{{ s }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="section-label">Location</div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label>City *</label>
+            <input type="text" name="city" required placeholder="e.g. Mumbai"
+                   value="{{ prop.city if prop else '' }}" />
+          </div>
+          <div class="form-group">
+            <label>Full Address *</label>
+            <input type="text" name="address" required placeholder="Street, Area, City"
+                   value="{{ prop.address if prop else '' }}" />
+          </div>
+        </div>
+
+        <div class="section-label">Property Details</div>
+
+        <div class="grid-3">
+          <div class="form-group">
+            <label>Price (₹) *</label>
+            <input type="number" name="price" required min="0" placeholder="e.g. 5000000"
+                   value="{{ prop.price | int if prop else '' }}" />
+          </div>
+          <div class="form-group">
+            <label>Area (sqft)</label>
+            <input type="number" name="area_sqft" min="0" placeholder="e.g. 1200"
+                   value="{{ prop.area_sqft | int if prop else '' }}" />
+          </div>
+          <div class="form-group">
+            <label>Bedrooms</label>
+            <input type="number" name="bedrooms" min="0" max="20" placeholder="0"
+                   value="{{ prop.bedrooms if prop else 0 }}" />
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Bathrooms</label>
+            <input type="number" name="bathrooms" min="0" max="20" placeholder="0"
+                   value="{{ prop.bathrooms if prop else 0 }}" />
+          </div>
+        </div>
+
+        <div class="section-label">Description</div>
+
+        <div class="form-group">
+          <label>Property Description</label>
+          <textarea name="description" placeholder="Describe the property — highlights, amenities, surroundings…">{{ prop.description if prop else '' }}</textarea>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">
+            {{ '+ Add Property' if action == 'Add' else '✓ Save Changes' }}
+          </button>
+          <a href="{{ url_for('properties') }}" class="btn btn-outline">Cancel</a>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

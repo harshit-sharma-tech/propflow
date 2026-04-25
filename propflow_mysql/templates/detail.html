@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+{% block title %}— {{ prop.title }}{% endblock %}
+
+{% block extra_style %}
+<style>
+  .detail-header {
+    background: var(--ink);
+    padding: 2.5rem 2rem;
+    border-bottom: 3px solid var(--gold);
+  }
+  .detail-header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .detail-header h1 {
+    font-family: 'Playfair Display', serif;
+    color: #fff;
+    font-size: 2rem;
+  }
+  .detail-header .meta { color: rgba(255,255,255,0.6); margin-top: 0.5rem; font-size: 0.9rem; }
+  .detail-header .badges { margin-top: 0.75rem; display: flex; gap: 0.5rem; }
+  .detail-price {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    color: var(--gold);
+    white-space: nowrap;
+  }
+  .detail-price small { display: block; font-family: 'DM Sans', sans-serif; font-size: 0.8rem; color: rgba(255,255,255,0.5); text-align: right; }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+    align-items: start;
+  }
+  @media(max-width: 768px) { .detail-grid { grid-template-columns: 1fr; } }
+
+  .info-card {
+    background: #fff;
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+  .info-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    margin-bottom: 1.1rem;
+    padding-bottom: 0.7rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .spec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
+  .spec-item { }
+  .spec-item .s-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+  .spec-item .s-value { font-size: 1.05rem; font-weight: 500; margin-top: 0.15rem; }
+
+  .back-link { color: var(--muted); text-decoration: none; font-size: 0.88rem; display: inline-flex; align-items: center; gap: 0.3rem; }
+  .back-link:hover { color: var(--ink); }
+
+  .actions-bar {
+    display: flex; gap: 0.75rem; margin-top: 1.25rem; padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detail-header">
+  <div class="detail-header-inner">
+    <div>
+      <a href="{{ url_for('properties') }}" class="back-link" style="color:rgba(255,255,255,0.5)">← Back to Properties</a>
+      <h1 style="margin-top:0.5rem">{{ prop.title }}</h1>
+      <div class="meta">📍 {{ prop.address }}, {{ prop.city }}</div>
+      <div class="badges">
+        <span class="badge badge-{{ prop.type.lower() }}">{{ prop.type }}</span>
+        <span class="badge badge-{{ prop.status.lower() }}">{{ prop.status }}</span>
+      </div>
+    </div>
+    <div>
+      <div class="detail-price">
+        ₹{{ "{:,.0f}".format(prop.price) }}
+        <small>Listed on {{ prop['created_at'].strftime('%d %b %Y') if prop['created_at'] else '' }}</small>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="detail-grid">
+
+    <!-- LEFT -->
+    <div>
+      {% if prop.description %}
+      <div class="info-card" style="margin-bottom:1.5rem">
+        <h3>About this Property</h3>
+        <p style="color:var(--muted); line-height:1.7">{{ prop.description }}</p>
+      </div>
+      {% endif %}
+
+      <div class="info-card">
+        <h3>Property Specifications</h3>
+        <div class="spec-grid">
+          <div class="spec-item">
+            <div class="s-label">Type</div>
+            <div class="s-value">{{ prop.type }}</div>
+          </div>
+          <div class="spec-item">
+            <div class="s-label">Status</div>
+            <div class="s-value">{{ prop.status }}</div>
+          </div>
+          <div class="spec-item">
+            <div class="s-label">City</div>
+            <div class="s-value">{{ prop.city }}</div>
+          </div>
+          <div class="spec-item">
+            <div class="s-label">Area</div>
+            <div class="s-value">{{ prop.area_sqft | int }} sqft</div>
+          </div>
+          {% if prop.bedrooms %}
+          <div class="spec-item">
+            <div class="s-label">Bedrooms</div>
+            <div class="s-value">{{ prop.bedrooms }} BHK</div>
+          </div>
+          {% endif %}
+          {% if prop.bathrooms %}
+          <div class="spec-item">
+            <div class="s-label">Bathrooms</div>
+            <div class="s-value">{{ prop.bathrooms }}</div>
+          </div>
+          {% endif %}
+          {% if prop.area_sqft and prop.price %}
+          <div class="spec-item">
+            <div class="s-label">Price / sqft</div>
+            <div class="s-value">₹{{ "{:,.0f}".format(prop.price / prop.area_sqft) }}</div>
+          </div>
+          {% endif %}
+          <div class="spec-item">
+            <div class="s-label">Listing ID</div>
+            <div class="s-value">#{{ '%04d' % prop.id }}</div>
+          </div>
+        </div>
+
+        <div class="actions-bar">
+          <a href="{{ url_for('edit_property', id=prop.id) }}" class="btn btn-primary">Edit Property</a>
+          <form method="POST" action="{{ url_for('delete_property', id=prop.id) }}" onsubmit="return confirm('Delete this listing permanently?')">
+            <button type="submit" class="btn btn-danger">Delete</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT SIDEBAR -->
+    <div>
+      <div class="info-card">
+        <h3>Quick Info</h3>
+        <div style="display:flex;flex-direction:column;gap:0.8rem">
+          <div>
+            <div style="font-size:0.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em">Asking Price</div>
+            <div style="font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--ink)">₹{{ "{:,.0f}".format(prop.price) }}</div>
+          </div>
+          <div style="border-top:1px solid var(--border);padding-top:0.8rem">
+            <div style="font-size:0.78rem;color:var(--muted)">📍 {{ prop.city }}</div>
+            <div style="font-size:0.82rem;color:var(--muted);margin-top:0.3rem">{{ prop.address }}</div>
+          </div>
+          {% if prop.bedrooms or prop.bathrooms %}
+          <div style="border-top:1px solid var(--border);padding-top:0.8rem;display:flex;gap:1rem">
+            {% if prop.bedrooms %}<span style="font-size:0.9rem">🛏 {{ prop.bedrooms }} Bed</span>{% endif %}
+            {% if prop.bathrooms %}<span style="font-size:0.9rem">🚿 {{ prop.bathrooms }} Bath</span>{% endif %}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

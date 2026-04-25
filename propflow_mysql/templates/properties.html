@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% block title %}— Properties{% endblock %}
+
+{% block extra_style %}
+<style>
+  .filter-bar {
+    background: #fff;
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+  }
+  .filter-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr auto;
+    gap: 0.75rem;
+    align-items: end;
+  }
+  @media(max-width: 900px) { .filter-row { grid-template-columns: 1fr 1fr; } }
+  .filter-row label { font-size: 0.78rem; }
+  .filter-row input, .filter-row select {
+    padding: 0.55rem 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  .prop-count { color: var(--muted); font-size: 0.9rem; margin-bottom: 1rem; }
+
+  .actions-col { white-space: nowrap; }
+  .prop-title a { font-weight: 500; color: var(--ink); text-decoration: none; }
+  .prop-title a:hover { color: var(--gold); }
+  .detail-meta { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
+
+  .empty { text-align: center; padding: 4rem; color: var(--muted); }
+  .empty h3 { font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 0.5rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>All Properties</h1>
+    <p>Search, filter, and manage your listings.</p>
+  </div>
+
+  <!-- FILTER BAR -->
+  <form method="GET" class="filter-bar">
+    <div class="filter-row">
+      <div class="form-group" style="margin:0">
+        <label>Search</label>
+        <input type="text" name="q" placeholder="Property name…" value="{{ request.args.get('q','') }}" />
+      </div>
+      <div class="form-group" style="margin:0">
+        <label>City</label>
+        <select name="city">
+          <option value="">All Cities</option>
+          {% for c in cities %}
+          <option value="{{ c }}" {{ 'selected' if request.args.get('city') == c }}>{{ c }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group" style="margin:0">
+        <label>Type</label>
+        <select name="type">
+          <option value="">All Types</option>
+          <option value="House"     {{ 'selected' if request.args.get('type')=='House' }}>House</option>
+          <option value="Apartment" {{ 'selected' if request.args.get('type')=='Apartment' }}>Apartment</option>
+          <option value="Land"      {{ 'selected' if request.args.get('type')=='Land' }}>Land</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin:0">
+        <label>Status</label>
+        <select name="status">
+          <option value="">All</option>
+          <option value="Available" {{ 'selected' if request.args.get('status')=='Available' }}>Available</option>
+          <option value="Sold"      {{ 'selected' if request.args.get('status')=='Sold' }}>Sold</option>
+          <option value="Rented"    {{ 'selected' if request.args.get('status')=='Rented' }}>Rented</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin:0">
+        <label>Min Price (₹)</label>
+        <input type="number" name="min_price" placeholder="0" value="{{ request.args.get('min_price','') }}" />
+      </div>
+      <div class="form-group" style="margin:0">
+        <label>Max Price (₹)</label>
+        <input type="number" name="max_price" placeholder="Any" value="{{ request.args.get('max_price','') }}" />
+      </div>
+      <div style="display:flex;gap:0.5rem;">
+        <button type="submit" class="btn btn-primary">Filter</button>
+        <a href="{{ url_for('properties') }}" class="btn btn-outline">✕</a>
+      </div>
+    </div>
+  </form>
+
+  <p class="prop-count">{{ props|length }} propert{{ 'y' if props|length == 1 else 'ies' }} found</p>
+
+  <div class="card">
+    {% if props %}
+    <table>
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>Type</th>
+          <th>City</th>
+          <th>Price</th>
+          <th>Area</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in props %}
+        <tr>
+          <td class="prop-title">
+            <a href="{{ url_for('view_property', id=p.id) }}">{{ p.title }}</a>
+            <div class="detail-meta">{{ p.address }}</div>
+          </td>
+          <td><span class="badge badge-{{ p.type.lower() }}">{{ p.type }}</span></td>
+          <td>{{ p.city }}</td>
+          <td class="price">₹{{ "{:,.0f}".format(p.price) }}</td>
+          <td>{{ p.area_sqft | int }} sqft</td>
+          <td><span class="badge badge-{{ p.status.lower() }}">{{ p.status }}</span></td>
+          <td class="actions-col">
+            <a href="{{ url_for('view_property', id=p.id) }}" class="btn btn-outline btn-sm">View</a>
+            <a href="{{ url_for('edit_property', id=p.id) }}" class="btn btn-outline btn-sm">Edit</a>
+            <form method="POST" action="{{ url_for('delete_property', id=p.id) }}" style="display:inline" onsubmit="return confirm('Delete this property?')">
+              <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty">
+      <h3>No properties found</h3>
+      <p>Try changing your filters or <a href="{{ url_for('new_property') }}">add a new listing</a>.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PropFlow {% block title %}{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:     #1a1a2e;
+      --gold:    #c9a84c;
+      --gold-lt: #f0d98a;
+      --cream:   #faf8f3;
+      --muted:   #6b6b7b;
+      --border:  #e8e4da;
+      --green:   #2d6a4f;
+      --red:     #9b2335;
+      --blue:    #1d4e89;
+      --card-bg: #ffffff;
+      --radius:  12px;
+      --shadow:  0 2px 20px rgba(0,0,0,0.07);
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    /* ── NAV ── */
+    nav {
+      background: var(--ink);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 2px solid var(--gold);
+    }
+    .nav-brand {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      color: var(--gold);
+      text-decoration: none;
+      letter-spacing: 0.02em;
+    }
+    .nav-brand span { color: #fff; font-weight: 300; font-size: 0.9rem; margin-left: 4px; }
+    .nav-links { display: flex; gap: 0.25rem; align-items: center; }
+    .nav-links a {
+      color: rgba(255,255,255,0.75);
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: #fff; background: rgba(201,168,76,0.2); }
+    .btn-nav {
+      background: var(--gold) !important;
+      color: var(--ink) !important;
+      font-weight: 500;
+      padding: 0.5rem 1.25rem !important;
+    }
+    .btn-nav:hover { background: var(--gold-lt) !important; }
+
+    /* ── LAYOUT ── */
+    .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+    .page-header { margin-bottom: 2rem; }
+    .page-header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      color: var(--ink);
+    }
+    .page-header p { color: var(--muted); margin-top: 0.4rem; }
+
+    /* ── FLASH ── */
+    .flash-wrap { padding: 0 1.5rem; }
+    .flash {
+      padding: 0.8rem 1.2rem;
+      border-radius: var(--radius);
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .flash.success { background: #d4edda; color: #155724; border-left: 4px solid #28a745; }
+    .flash.info    { background: #d1ecf1; color: #0c5460; border-left: 4px solid #17a2b8; }
+    .flash.error   { background: #f8d7da; color: #721c24; border-left: 4px solid #dc3545; }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    /* ── BADGES ── */
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.7rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+    }
+    .badge-available { background: #d4edda; color: var(--green); }
+    .badge-sold      { background: #f8d7da; color: var(--red); }
+    .badge-rented    { background: #cce5ff; color: var(--blue); }
+    .badge-house     { background: #fff3cd; color: #856404; }
+    .badge-apartment { background: #e2e3e5; color: #383d41; }
+    .badge-land      { background: #d4edda; color: #155724; }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.6rem 1.3rem;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-primary { background: var(--ink); color: #fff; }
+    .btn-primary:hover { background: #2d2d4a; }
+    .btn-gold { background: var(--gold); color: var(--ink); }
+    .btn-gold:hover { background: var(--gold-lt); }
+    .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--ink); }
+    .btn-outline:hover { border-color: var(--ink); }
+    .btn-danger { background: #fff0f0; color: var(--red); border: 1.5px solid #f5c6cb; }
+    .btn-danger:hover { background: #f8d7da; }
+    .btn-sm { padding: 0.4rem 0.9rem; font-size: 0.82rem; }
+
+    /* ── FORM ── */
+    .form-group { margin-bottom: 1.25rem; }
+    label { display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 0.4rem; color: var(--ink); }
+    input, select, textarea {
+      width: 100%;
+      padding: 0.65rem 0.9rem;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.92rem;
+      background: #fff;
+      color: var(--ink);
+      transition: border-color 0.2s;
+      outline: none;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--gold); }
+    textarea { resize: vertical; min-height: 100px; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+    @media(max-width: 640px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+    /* ── TABLE ── */
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      text-align: left;
+      padding: 0.8rem 1rem;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      border-bottom: 2px solid var(--border);
+      font-weight: 500;
+    }
+    td { padding: 0.9rem 1rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fafaf7; }
+
+    /* ── STAT CARD ── */
+    .stat-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+    .stat-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+    .stat-value { font-family: 'Playfair Display', serif; font-size: 2.5rem; color: var(--ink); line-height: 1.1; margin-top: 0.3rem; }
+    .stat-sub { font-size: 0.82rem; color: var(--muted); margin-top: 0.3rem; }
+
+    .price { font-weight: 500; }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+      font-size: 0.82rem;
+      border-top: 1px solid var(--border);
+      margin-top: 4rem;
+    }
+  </style>
+  {% block extra_style %}{% endblock %}
+</head>
+<body>
+
+<nav>
+  <a href="{{ url_for('index') }}" class="nav-brand">PropFlow <span>Real Estate</span></a>
+  <div class="nav-links">
+    <a href="{{ url_for('index') }}" class="{{ 'active' if request.endpoint == 'index' }}">Dashboard</a>
+    <a href="{{ url_for('properties') }}" class="{{ 'active' if request.endpoint == 'properties' }}">Properties</a>
+    <a href="{{ url_for('new_property') }}" class="btn-nav">+ Add Listing</a>
+  </div>
+</nav>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-wrap">
+      {% for cat, msg in messages %}
+        <div class="flash {{ cat }}">{{ msg }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+{% block content %}{% endblock %}
+
+<footer>PropFlow &copy; 2024 — Real Estate Management System</footer>
+</body>
+</html>
