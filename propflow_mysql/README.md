@@ -114,10 +114,4 @@ GET  /api/stats        →  { total, available, sold, rented, avg_price }
 
 ---
 
-## 💬 What to say in the interview
 
-> *"I used Flask with PyMySQL to connect to a MySQL database.
-> I separated config from code using config.py, and used parameterized queries
-> with %s placeholders throughout — which prevents SQL injection.
-> The init_db.py script handles first-time setup cleanly.
-> I also added REST API endpoints at /api/stats and /api/properties."*
